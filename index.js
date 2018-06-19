@@ -1,9 +1,10 @@
 const sha256 = require('crypto-js/sha256');
 
 class Blockchain {
-  constructor() {
+  constructor({ difficulty = 2}) {
     this.blocks = [];
-    this.difficulty = 1;
+    this.difficulty = difficulty;
+    // this.numberOfZeros = this.generateZeros();
   }
 
   addBlock(block) {
@@ -11,6 +12,14 @@ class Blockchain {
     if(this.validateBlock(block)) {
       this.blocks.push(block);
     }
+  }
+
+  mineBlock(block) {
+    const miner = new Miner(block);
+    miner.generateHash();
+    // block.hash = this.generateHash(block);
+
+    this.addBlock(miner.block);
   }
 
   validateBlock(block) {
@@ -26,14 +35,11 @@ class Blockchain {
   }
 }
 
-class Block {
-  constructor({data = {}}) {
-    this.data = data;
-    this.previousHash = '';
-    this.difficulty = 4;
-    this.numberOfZeros = this.generateZeros();
-
-    this.hash = this.generateHash();
+class Miner {
+  constructor(block, difficulty) {
+    this.block = block;
+    this.difficulty = difficulty;
+    this.numberOfZeros = '';
   }
 
   generateZeros() {
@@ -52,25 +58,34 @@ class Block {
     let nounce = 0;
 
     while (hashSub !== this.numberOfZeros) {
-      hash = sha256(JSON.stringify(this.data + nounce)).toString();
+      const message = `${JSON.stringify(this.block.data)}${nounce}`;
+      hash = sha256(message).toString();
       hashSub = hash.substring(0, this.difficulty);
 
       if(hashSub === this.numberOfZeros) {
-        this.nounce = nounce;
+        this.block.nounce = nounce;
+        this.block.hash = hash;
       }
+
+      // if(nounce === 1000) break;
 
       nounce++;
     }
-
-    return hash;
   }
 }
 
-const chain = new Blockchain();
+class Block {
+  constructor({data = {}}) {
+    this.data = data;
+    this.previousHash = '';
+  }
+}
 
-for (var i = 0; i < [1].length; i++) {
-  const block = new Block({ data: { amount: [1][i] }});
-  chain.addBlock(block);
+const chain = new Blockchain({ difficulty: 3});
+
+for (var i = 0; i < [1,2,3,4,5].length; i++) {
+  const block = new Block({ data: { amount: [1,2,3,4,5][i] }});
+  chain.mineBlock(block);
 }
 
 console.log(JSON.stringify(chain, null, 2));

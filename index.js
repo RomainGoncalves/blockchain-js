@@ -3,7 +3,6 @@ const sha256 = require('crypto-js/sha256');
 class Blockchain {
   constructor({ difficulty = 2}) {
     this.blocks = [];
-    this.queue = [];
     this.difficulty = difficulty;
   }
 

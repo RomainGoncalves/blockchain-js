@@ -3,8 +3,8 @@ const sha256 = require('crypto-js/sha256');
 class Blockchain {
   constructor({ difficulty = 2}) {
     this.blocks = [];
+    this.queue = [];
     this.difficulty = difficulty;
-    // this.numberOfZeros = this.generateZeros();
   }
 
   addBlock(block) {
@@ -14,7 +14,8 @@ class Blockchain {
   }
 
   async mineBlock(block) {
-    block.previousHash = this.findPreviousHash();
+    block.setPreviousHash(this.findPreviousHash());
+
     const miner = new Miner(block, this.difficulty);
     await miner.generateHash();
 
@@ -84,20 +85,36 @@ class Block {
     this.previousHash = '';
     this.hash = '';
   }
+
+  setPreviousHash(hash) {
+    this.previousHash = hash;
+  }
 }
 
 const chain = new Blockchain({difficulty: 2});
 
-const values = [1, 2];
+const values = [1];
 
 for (var i = 0; i < values.length; i++) {
-  const block = new Block({ data: { amount: values[i] }});
+  const block = new Block({
+    data: { amount: values[i] },
+  });
   chain.mineBlock(block);
-  // console.log(block);
 }
 
 // This gives time to the for to start executing,
 // and the await to kick in. It will wait until all are resolved
 setTimeout(function () {
-  console.log(JSON.stringify(chain, null, 2));
+  // console.log(JSON.stringify(chain, null, 2));
+
+  const block = new Block({
+    data: { amount: 2 },
+  });
+  chain.mineBlock(block);
+
+  setTimeout(function () {
+    console.log(JSON.stringify(chain, null, 2));
+
+  }, 10);
+
 }, 10);

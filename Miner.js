@@ -24,19 +24,22 @@ class Miner {
 
     const promise = new Promise(resolve => {
       while (hashSub !== this.numberOfZeros) {
-        const message = `${JSON.stringify(this.block.data)}${nounce}${this.block.previousHash}`;
+        const message = JSON.stringify(this.block.header);
         hash = sha256(message).toString();
         hashSub = hash.substring(0, this.difficulty);
 
         if(hashSub === this.numberOfZeros) {
-          this.block.nounce = nounce;
           this.block.hash = hash;
           resolve(this.block);
+          break;
         }
 
-        // if(nounce === 1000) break;
+        // if(this.block.header.miningCompetition.nounce === 1000) {
+        //   resolve();
+        //   break;
+        // }
 
-        nounce++;
+        this.block.header.miningCompetition.nounce++;
       }
     });
 

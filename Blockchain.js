@@ -28,7 +28,7 @@ class Blockchain {
     const blockHash = this.calculateBlockHash(block);
 
     if (
-      (previousHash === block.previousHash) &&
+      (previousHash === block.header.previousHash) &&
       (blockHash === block.hash)
     ) return true;
 
@@ -38,7 +38,7 @@ class Blockchain {
   }
 
   calculateBlockHash(block) {
-    const message = `${JSON.stringify(block.data)}${block.nounce}${block.previousHash}`;
+    const message = JSON.stringify(block.header);
     const hash = sha256(message).toString();
 
     return hash;

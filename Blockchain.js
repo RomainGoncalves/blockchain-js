@@ -39,7 +39,7 @@ class Blockchain {
 
   calculateBlockHash(block) {
     const message = JSON.stringify(block.header);
-    const hash = sha256(message).toString();
+    const hash = sha256(sha256(message)).toString();
 
     return hash;
   }

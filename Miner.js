@@ -25,7 +25,7 @@ class Miner {
     const promise = new Promise(resolve => {
       while (hashSub !== this.numberOfZeros) {
         const message = JSON.stringify(this.block.header);
-        hash = sha256(message).toString();
+        hash = sha256(sha256(message)).toString();
         hashSub = hash.substring(0, this.difficulty);
 
         if(hashSub === this.numberOfZeros) {

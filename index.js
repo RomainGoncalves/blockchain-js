@@ -8,14 +8,13 @@ class Blockchain {
   }
 
   addBlock(block) {
-    block.previousHash = this.findPreviousHash();
-
     if(this.validateBlock(block)) {
       this.blocks.push(block);
     }
   }
 
   async mineBlock(block) {
+    block.previousHash = this.findPreviousHash();
     const miner = new Miner(block, this.difficulty);
     await miner.generateHash();
 
@@ -59,7 +58,7 @@ class Miner {
 
     const promise = new Promise(resolve => {
       while (hashSub !== this.numberOfZeros) {
-        const message = `${JSON.stringify(this.block.data)}${nounce}`;
+        const message = `${JSON.stringify(this.block.data)}${nounce}${this.block.previousHash}`;
         hash = sha256(message).toString();
         hashSub = hash.substring(0, this.difficulty);
 

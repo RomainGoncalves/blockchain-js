@@ -2,13 +2,13 @@ const sha256 = require('crypto-js/sha256');
 
 class Blockchain {
   constructor({ difficulty = 2}) {
-    this.blocks = [];
+    this.chain = [];
     this.difficulty = difficulty;
   }
 
   addBlock(block) {
     if(this.validateBlock(block)) {
-      this.blocks.push(block);
+      this.chain.push(block);
     }
   }
 
@@ -22,11 +22,26 @@ class Blockchain {
   }
 
   validateBlock(block) {
-    return true;
+    const previousHash = this.findPreviousHash();
+    const blockHash = this.calculateBlockHash(block);
+
+    if (
+      (previousHash === block.previousHash) &&
+      (blockHash === block.hash)
+    ) return true;
+
+    return false
+  }
+
+  calculateBlockHash(block) {
+    const message = `${JSON.stringify(block.data)}${block.nounce}${block.previousHash}`;
+    const hash = sha256(message).toString();
+
+    return hash;
   }
 
   findPreviousHash() {
-    const lastBlock = this.blocks[this.blocks.length -1];
+    const lastBlock = this.chain[this.chain.length -1];
 
     if(lastBlock !== undefined) return lastBlock.hash;
 

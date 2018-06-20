@@ -4,14 +4,11 @@ const Block = require('./Block');
 
 const chain = new Blockchain({difficulty: 2});
 
-const values = [1];
+const block = new Block({
+  data: { amount: 1 },
+});
+chain.mineBlock(block);
 
-for (var i = 0; i < values.length; i++) {
-  const block = new Block({
-    data: { amount: values[i] },
-  });
-  chain.mineBlock(block);
-}
 
 // This gives time to the for to start executing,
 // and the await to kick in. It will wait until all are resolved

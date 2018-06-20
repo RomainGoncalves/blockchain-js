@@ -9,15 +9,15 @@ class Blockchain {
 
   addBlock(block) {
     block.previousHash = this.findPreviousHash();
+
     if(this.validateBlock(block)) {
       this.blocks.push(block);
     }
   }
 
-  mineBlock(block) {
-    const miner = new Miner(block);
-    miner.generateHash();
-    // block.hash = this.generateHash(block);
+  async mineBlock(block) {
+    const miner = new Miner(block, this.difficulty);
+    await miner.generateHash();
 
     this.addBlock(miner.block);
   }
@@ -39,7 +39,7 @@ class Miner {
   constructor(block, difficulty) {
     this.block = block;
     this.difficulty = difficulty;
-    this.numberOfZeros = '';
+    this.numberOfZeros = this.generateZeros();
   }
 
   generateZeros() {
@@ -57,20 +57,25 @@ class Miner {
     let hashSub = hash.substring(0, this.difficulty);
     let nounce = 0;
 
-    while (hashSub !== this.numberOfZeros) {
-      const message = `${JSON.stringify(this.block.data)}${nounce}`;
-      hash = sha256(message).toString();
-      hashSub = hash.substring(0, this.difficulty);
+    const promise = new Promise(resolve => {
+      while (hashSub !== this.numberOfZeros) {
+        const message = `${JSON.stringify(this.block.data)}${nounce}`;
+        hash = sha256(message).toString();
+        hashSub = hash.substring(0, this.difficulty);
 
-      if(hashSub === this.numberOfZeros) {
-        this.block.nounce = nounce;
-        this.block.hash = hash;
+        if(hashSub === this.numberOfZeros) {
+          this.block.nounce = nounce;
+          this.block.hash = hash;
+          resolve(this.block);
+        }
+
+        // if(nounce === 1000) break;
+
+        nounce++;
       }
+    });
 
-      // if(nounce === 1000) break;
-
-      nounce++;
-    }
+    return promise;
   }
 }
 
@@ -78,14 +83,22 @@ class Block {
   constructor({data = {}}) {
     this.data = data;
     this.previousHash = '';
+    this.hash = '';
   }
 }
 
-const chain = new Blockchain({ difficulty: 3});
+const chain = new Blockchain({difficulty: 2});
 
-for (var i = 0; i < [1,2,3,4,5].length; i++) {
-  const block = new Block({ data: { amount: [1,2,3,4,5][i] }});
+const values = [1, 2];
+
+for (var i = 0; i < values.length; i++) {
+  const block = new Block({ data: { amount: values[i] }});
   chain.mineBlock(block);
+  // console.log(block);
 }
 
-console.log(JSON.stringify(chain, null, 2));
+// This gives time to the for to start executing,
+// and the await to kick in. It will wait until all are resolved
+setTimeout(function () {
+  console.log(JSON.stringify(chain, null, 2));
+}, 10);

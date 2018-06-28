@@ -16,13 +16,22 @@ class Blockchain {
   }
 
   addCandidateBlock(block) {
-    this.candidateBlocks.push(block);
+    var found = this.candidateBlocks.find(
+      b => b.header.merkleRoot === block.header.merkleRoot
+    )
+
+    if(!found){
+      console.log('Adding candidate block...');
+      this.candidateBlocks.push(block);
+    }
   }
 
   addBlock(block) {
     const promise = new Promise(resolve => {
       if(this.validateBlock(block)) {
         this.removeCandidateBlock(block);
+        this.removeTransactions(block);
+
         this.blocks.push(block);
         console.log('Added block');
         resolve();
@@ -43,6 +52,15 @@ class Blockchain {
     );
   }
 
+  removeTransactions(block) {
+    block.transactions.forEach(transaction =>
+    remove(
+      this.transactions,
+      t => t.amount === transaction.amount,
+    ));
+    console.log('Transactions removed...', this.transactions);
+  }
+
   createTransaction(transaction) {
     if (transaction instanceof Transaction) this.transactions.push(transaction);
   }
@@ -54,7 +72,9 @@ class Blockchain {
     this.addCandidateBlock(block);
   }
 
-  mineBlock(block) {
+  mineBlock() {
+    const block = this.candidateBlocks[0];
+
     if(this.busy) {
       this.interval = setInterval(() => {
         this.mineBlock(block);

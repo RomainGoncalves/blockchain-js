@@ -4,11 +4,14 @@ const chunk = require('lodash/chunk');
 class Block {
   constructor({
     chainTransactions = [],
+    chain,
   }) {
     this.hash = '';
+    this.chain = chain;
     this.chainTransactions = chainTransactions;
     this.transactions = [];
     this.transactionLimit = 1;
+    this.transactionsReady = false;
     this.setTransactions();
 
     this.header = this.initHeader();
@@ -31,15 +34,26 @@ class Block {
       // That's for limiting the size of the block. 1Mb for Bitcoin
       if(this.transactions.length > this.transactionLimit) {
         delete this.chainTransactions;
+        this.transactionsReady = true;
         return;
       };
 
       this.transactions.push(t);
-      this.chainTransactions.shift(0, 0);
     });
   }
 
   createMerkleRoot() {
+    console.log(this.transactions);
+    if(!this.transactionsReady){
+      console.log('EVER HERE');
+      this.interval = setInterval(() => {
+        this.createMerkleRoot();
+        return;
+      }, 100);
+    }
+
+    clearInterval(this.interval);
+
     return this.recursive(this.transactions);
   }
 

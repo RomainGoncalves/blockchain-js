@@ -1,13 +1,12 @@
 const sha256 = require('crypto-js/sha256');
 const chunk = require('lodash/chunk');
+const helpers = require('./helpers');
 
 class Block {
   constructor({
     chainTransactions = [],
-    chain,
   }) {
     this.hash = '';
-    this.chain = chain;
     this.chainTransactions = chainTransactions;
     this.transactions = [];
     this.transactionLimit = 1;
@@ -43,28 +42,21 @@ class Block {
   }
 
   createMerkleRoot() {
-    console.log(this.transactions);
-    if(!this.transactionsReady){
-      console.log('EVER HERE');
-      this.interval = setInterval(() => {
-        this.createMerkleRoot();
-        return;
-      }, 100);
-    }
-
-    clearInterval(this.interval);
-
     return this.recursive(this.transactions);
+  }
+
+  makeChunksAndJoin(transactions) {
+    return transactions.length > 1 ? chunk(transactions, 2).map(t => t.join('')) : [];
   }
 
   recursive(transactions) {
     const newTransactions = transactions.map(
-      transaction => sha256(JSON.stringify(transaction)).toString()
+      transaction => helpers.doubleHashing(transaction)
     );
 
-    const chunks = newTransactions.length > 1 ? chunk(newTransactions, 2).map(t => t.join('')) : [];
+    const chunks = this.makeChunksAndJoin(newTransactions);
 
-    if(chunks.length <= 1) return sha256(chunks).toString();
+    if(chunks.length <= 1) return helpers.doubleHashing(chunks[0]).toString();
 
     return this.recursive(chunks);
   }
@@ -73,9 +65,5 @@ class Block {
     this.header.previousHash = hash;
   }
 }
-//
-// console.log(
-//   new Block({})
-// );
 
 module.exports = Block;

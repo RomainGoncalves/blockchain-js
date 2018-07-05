@@ -53,4 +53,55 @@ describe('Block', () => {
       ])).toEqual(merkleRoot);
     });
   });
+
+  describe('Transactions', () => {
+    it('should set the transaction according to the limit', () => {
+      expect(block.transactions.length).toEqual(2);
+
+      const block2 = new Block({
+        chainTransactions: [
+          { amount: 10 },
+          { amount: 20 },
+          { amount: 30 },
+        ]
+      });
+
+      expect(block2.transactions.length).toEqual(2);
+
+      const block3 = new Block({
+        transactionLimit: 3,
+        chainTransactions: [
+          { amount: 10 },
+          { amount: 20 },
+          { amount: 30 },
+          { amount: 40 },
+          { amount: 50 },
+          { amount: 60 },
+        ]
+      });
+
+      expect(block3.transactions.length).toEqual(3);
+
+      const block4 = new Block({
+        transactionLimit: 3,
+        chainTransactions: [
+          { amount: 10 },
+        ]
+      });
+
+      expect(block4.transactions.length).toEqual(1);
+    });
+
+    it('should return an error if there are no transaction in the chain', () => {
+      expect(() => new Block({})).toThrowError('There are no transactions in the chain');
+    });
+  });
+
+  describe('Set previous hash', () => {
+    it('should set the previous hash', () => {
+      block.setPreviousHash('1234');
+
+      expect(block.header.previousHash).toEqual('1234');
+    });
+  });
 });

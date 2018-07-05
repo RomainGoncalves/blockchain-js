@@ -5,11 +5,14 @@ const helpers = require('./helpers');
 class Block {
   constructor({
     chainTransactions = [],
+    transactionLimit = 2,
   }) {
+    if(chainTransactions.length === 0) throw new Error('There are no transactions in the chain');
+
     this.hash = '';
     this.chainTransactions = chainTransactions;
     this.transactions = [];
-    this.transactionLimit = 1;
+    this.transactionLimit = transactionLimit;
     this.transactionsReady = false;
     this.setTransactions();
 
@@ -31,7 +34,7 @@ class Block {
   setTransactions() {
     this.chainTransactions.forEach(t => {
       // That's for limiting the size of the block. 1Mb for Bitcoin
-      if(this.transactions.length > this.transactionLimit) {
+      if(this.transactions.length === this.transactionLimit) {
         delete this.chainTransactions;
         this.transactionsReady = true;
         return;

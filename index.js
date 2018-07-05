@@ -2,7 +2,7 @@ const sha256 = require('crypto-js/sha256');
 const Blockchain = require('./Blockchain');
 const Transaction = require('./Transaction');
 
-const chain = new Blockchain({difficulty: 3});
+const chain = new Blockchain({difficulty: 3, transactionLimit: 3});
 
 [10, 20, 30, 40, 50].forEach(t => chain.createTransaction(new Transaction({amount: t})));
 

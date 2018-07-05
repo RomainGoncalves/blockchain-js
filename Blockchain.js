@@ -6,13 +6,14 @@ const Miner = require('./Miner');
 const Transaction = require('./Transaction');
 
 class Blockchain {
-  constructor({ difficulty = 2}) {
+  constructor({ difficulty = 2, transactionLimit = 2 }) {
     this.blocks = [];
     this.transactions = [];
     this.candidateBlocks = [];
     this.busy = false;
     this.interval;
     this.difficulty = difficulty;
+    this.transactionLimit = transactionLimit;
   }
 
   addCandidateBlock(block) {
@@ -68,6 +69,7 @@ class Blockchain {
   createBlock() {
     const block = new Block({
       chainTransactions: this.transactions,
+      transactionLimit: this.transactionLimit,
     });
     this.addCandidateBlock(block);
   }

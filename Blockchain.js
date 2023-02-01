@@ -75,7 +75,10 @@ class Blockchain {
   }
 
   mineBlock() {
+    console.log(this.candidateBlocks);
     const block = this.candidateBlocks[0];
+
+    if(!block) return;
 
     if(this.busy) {
       this.interval = setInterval(() => {
